@@ -1,0 +1,2 @@
+[*.cs]
+file_header_template = Copyright (c) Dolittle. All rights reserved.\nLicensed under the MIT license. See LICENSE file in the project root for full license information.
