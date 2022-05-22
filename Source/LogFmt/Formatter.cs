@@ -54,6 +54,8 @@ public class Formatter : ConsoleFormatter
 
         if (_options.IncludeScopes && scopeProvider != null)
             WriteScope(textWriter, logEntry.State, scopeProvider);
+        
+        textWriter.WriteLine();
     }
 
     static void WriteTimestamp(TextWriter writer, bool useUtc, string format)
