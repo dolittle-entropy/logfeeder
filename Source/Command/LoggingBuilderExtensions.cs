@@ -13,77 +13,49 @@ namespace Command;
 public static class LoggingBuilderExtensions
 {
     /// <summary>
-    /// Configures the output formatter for the loggers using the "formatter" and "colors" environmental variables. 
+    /// Configures the output formatter for the loggers. 
     /// </summary>
     /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
     /// <returns>The <see cref="ILoggingBuilder"/> for continuation.</returns>
     public static ILoggingBuilder ConfigureFormatter(this ILoggingBuilder builder)
     {
-        switch (Environment.GetEnvironmentVariable("formatter")?.ToLowerInvariant())
+        switch (Configuration.GetFormatter())
         {
-            case "logfmt":
+            case Formatter.LogFmt:
                 builder.AddLogFmtConsole(_ =>
                 {
                     _.UseUtcTimestamp = true;
-                    _.TimestampFormat = "O";
+                    if (Configuration.ShouldPrintTime())
+                        _.TimestampFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK";
                 });
                 break;
-            case "json":
+            case Formatter.Json:
                 builder.AddJsonConsole(_ =>
                 {
                     _.UseUtcTimestamp = true;
-                    _.TimestampFormat = "O";
+                    if (Configuration.ShouldPrintTime())
+                        _.TimestampFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK";
                 });
                 break;
-            default:
+            case Formatter.Simple:
                 builder.AddSimpleConsole(_ =>
                 {
                     _.UseUtcTimestamp = true;
-                    _.TimestampFormat = "O";
-
-                    var useColors = Environment.GetEnvironmentVariable("colors")?.ToLowerInvariant() != "false";
-                    _.ColorBehavior = useColors ? LoggerColorBehavior.Enabled : LoggerColorBehavior.Disabled;
+                    if (Configuration.ShouldPrintTime())
+                        _.TimestampFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK' '";
+                    _.ColorBehavior =  Configuration.ShouldUseColors() ? LoggerColorBehavior.Enabled : LoggerColorBehavior.Disabled;
                 });
                 break;
         }
-
+        
         return builder;
     }
 
     /// <summary>
-    /// Configures the minimum loglevel to output using the "level" environmental variable.
+    /// Configures the minimum loglevel to output.
     /// </summary>
     /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
     /// <returns>The <see cref="ILoggingBuilder"/> for continuation.</returns>
     public static ILoggingBuilder ConfigureLogLevel(this ILoggingBuilder builder)
-    {
-        switch (Environment.GetEnvironmentVariable("level")?.ToLowerInvariant())
-        {
-            case "crit":
-            case "critical":
-                builder.SetMinimumLevel(LogLevel.Critical);
-                break;
-            case "err":
-            case "error":
-                builder.SetMinimumLevel(LogLevel.Error);
-                break;
-            case "warn":
-            case "warning":
-                builder.SetMinimumLevel(LogLevel.Warning);
-                break;
-            case "info":
-            case "information":
-                builder.SetMinimumLevel(LogLevel.Information);
-                break;
-            case "debug":
-                builder.SetMinimumLevel(LogLevel.Debug);
-                break;
-            case "trace":
-            default:
-                builder.SetMinimumLevel(LogLevel.Trace);
-                break;
-        }
-
-        return builder;
-    }
+        => builder.SetMinimumLevel(Configuration.GetMinimumLogLevel());
 }
