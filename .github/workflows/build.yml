@@ -29,7 +29,6 @@ jobs:
         with:
           push: false
           context: .
-          file: ./Docker/Production/Dockerfile
           build-args: |
             VERSION=0.0.0
           platforms: linux/amd64,linux/arm64
